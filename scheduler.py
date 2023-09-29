@@ -10,9 +10,6 @@ from datetime import timedelta
 paused=True
 on_error =None
 on_error_parameters = []
-db={"tasks" : []}
-str_tasks=None
-
 
 def parse_timedelta_from_string(input_string):
 	# Initialize components with default values
@@ -34,8 +31,7 @@ def parse_timedelta_from_string(input_string):
 	# Create a timedelta object using the extracted components
 	return timedelta(hours=hours, minutes=minutes, seconds=seconds)
 
-def tasks_updated() :
-	db["tasks"]=pickle.dumps([task.parse_to_str() for task in tasks])
+
 def task_executer() :
 	last_checked_date=datetime.now()
 	while True :
@@ -75,15 +71,11 @@ class Modern_Thread(Thread) :
 		self.exception=None
 		self.handle_exception=True
 		def ass(self : Modern_Thread, target, args) :
-			print("a")
 			try :
 				target(*args)
-				print("b")
 			except Exception as e :
 				self.exception=e
-				print("c")
 				if self.handle_exception and on_error is not None :
-					print("d")
 					on_error(*[e]+on_error_parameters)
 		super().__init__(group, ass, name, [self, target]+[args], kwargs, daemon=daemon)
 	def start(self) :
@@ -117,7 +109,6 @@ class Task :
 			self=pickle.loads(str_repr)
 		self.to_be_executed=True
 		tasks.append(self)
-		tasks_updated()
 	def parse_to_str(self) :
 		return pickle.dumps(self)
 	def evaluate_execution_timedelta(self) :
@@ -131,7 +122,6 @@ class Task :
 		self.to_be_executed=True
 	def destroy(self) :
 		tasks.remove(self)
-		tasks_updated()
 
 tasks : List[Task]=[]
 threads : List[Modern_Thread] = []
